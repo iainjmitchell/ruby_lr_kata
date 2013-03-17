@@ -48,8 +48,28 @@ class BookingTests < Test::Unit::TestCase
         assert_equal(Money.new(amount: expected_total_amount), @displayed_total)
     end
 
-    def test_
-        assert_equal(Money.new(amount: single_room_stay))
+    def test_When_booking_one_night_in_single_and_double_room_at_palace_hotel_Then_displayed_total_is_room_prices_combined
+        single_room_stay = HotelRoomStay.new(
+            hotel: 'Palace Hotel',
+            room_type: 'Single Room',
+            number_of_nights: 1
+        )
+        double_room_stay = HotelRoomStay.new(
+            hotel: 'Palace Hotel', 
+            room_type: 'Double Room',
+            number_of_nights: 1
+        )
+        room_prices_combined = PRICE_OF_ONE_NIGHT_IN_SINGLE_ROOM_AT_PALACE_HOTEL.amount + PRICE_OF_ONE_NIGHT_IN_DOUBLE_ROOM_AT_PALACE_HOTEL.amount
+        room_type_price_repository = FakeRoomTypePriceRepository.new({
+            single_room_stay.room_type => PRICE_OF_ONE_NIGHT_IN_SINGLE_ROOM_AT_PALACE_HOTEL,
+            double_room_stay.room_type => PRICE_OF_ONE_NIGHT_IN_DOUBLE_ROOM_AT_PALACE_HOTEL
+            })
+        Booking.new(self, room_type_price_repository)
+            .add(single_room_stay)
+            .add(double_room_stay)
+            .total
+
+        assert_equal(Money.new(amount: room_prices_combined), @displayed_total)
     end
     
     def show_total(total)
