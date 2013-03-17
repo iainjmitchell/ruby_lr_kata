@@ -1,8 +1,6 @@
 require 'test/unit'
 require './src/Money'
 
-
-
 class BookingTests < Test::Unit::TestCase 
     PRICE_OF_ONE_NIGHT_IN_DOUBLE_ROOM_AT_PALACE_HOTEL = Money.new(amount: 79)
     PRICE_OF_ONE_NIGHT_IN_SINGLE_ROOM_AT_PALACE_HOTEL = Money.new(amount: 63)
@@ -50,9 +48,9 @@ class BookingTests < Test::Unit::TestCase
         assert_equal(Money.new(amount: expected_total_amount), @displayed_total)
     end
 
-    # def test_
-    #     assert_equal(Money.new(amount: single_room_stay))
-    # end
+    def test_
+        assert_equal(Money.new(amount: single_room_stay))
+    end
     
     def show_total(total)
         @displayed_total = total
@@ -126,8 +124,6 @@ class BookingTotal
         @booking_display.show_total(Money.new(amount: @total_amount))
     end
 end
-
-
 
 class HotelRoomStay
     attr_reader :hotel, :room_type, :number_of_nights
