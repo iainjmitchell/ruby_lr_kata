@@ -8,7 +8,9 @@ class BookingTests < Test::Unit::TestCase
             room_type: 'Double Room',
             number_of_nights: 1
         )
-        Booking.new(self, {hotel_room_stay.room_type => price_of_one_night_in_double_room_at_palace_hotel})
+        room_type_price_repository = FakeRoomTypePriceRepository.new(
+            {hotel_room_stay.room_type => price_of_one_night_in_double_room_at_palace_hotel})
+        Booking.new(self, room_type_price_repository)
             .add(hotel_room_stay)
             .total
         assert_equal(price_of_one_night_in_double_room_at_palace_hotel, @displayed_total)
@@ -21,7 +23,9 @@ class BookingTests < Test::Unit::TestCase
             room_type: 'Single Room',
             number_of_nights: 1
         )
-        Booking.new(self, {hotel_room_stay.room_type => price_of_one_night_in_single_room_at_palace_hotel})
+        room_type_price_repository = FakeRoomTypePriceRepository.new(
+            {hotel_room_stay.room_type => price_of_one_night_in_single_room_at_palace_hotel})
+        Booking.new(self, room_type_price_repository)
             .add(hotel_room_stay)
             .total
         assert_equal(price_of_one_night_in_single_room_at_palace_hotel, @displayed_total)
@@ -32,10 +36,20 @@ class BookingTests < Test::Unit::TestCase
     end
 end
 
+class FakeRoomTypePriceRepository
+    def initialize(room_prices)
+        @room_prices = room_prices
+    end
+
+    def get(room_type)
+        @room_prices[room_type]
+    end
+end
+
 class Booking
-    def initialize(booking_display, room_prices)
+    def initialize(booking_display, room_type_price_repository)
         @booking_total = BookingTotal.new(booking_display)
-        @hotel = Hotel.new(room_prices, @booking_total)
+        @hotel = Hotel.new(@booking_total, room_type_price_repository)
     end
     
     def add(hotel_room_stay)
@@ -58,16 +72,18 @@ class HotelBooking
 end
 
 class Hotel
-    def initialize(room_prices, booking_total)
-        @room_prices = room_prices
+    def initialize(booking_total, room_type_price_repository)
         @booking_total = booking_total
+        @room_type_price_repository = room_type_price_repository
     end
 
     def book_room(hotel_booking)
-        room_price = @room_prices[hotel_booking.room_type] 
+        room_price = @room_type_price_repository.get(hotel_booking.room_type)
         @booking_total.increment_by(room_price)
     end
 end
+
+
 
 class BookingTotal
     def initialize(booking_display)
