@@ -1,50 +1,58 @@
 require 'test/unit'
+require './src/Money'
 
-class BookingTests < Test::Unit::TestCase    
-    def test_When_booking_one_night_in_double_room_at_palace_hotel_Then_displayed_total_is_79_pounds
-        price_of_one_night_in_double_room_at_palace_hotel = Money.new(amount: 79)
+
+
+class BookingTests < Test::Unit::TestCase 
+    PRICE_OF_ONE_NIGHT_IN_DOUBLE_ROOM_AT_PALACE_HOTEL = Money.new(amount: 79)
+    PRICE_OF_ONE_NIGHT_IN_SINGLE_ROOM_AT_PALACE_HOTEL = Money.new(amount: 63)
+
+    def test_When_booking_one_night_in_double_room_at_palace_hotel_Then_displayed_total_matches_room_price
         hotel_room_stay = HotelRoomStay.new(
             hotel: 'Palace Hotel', 
             room_type: 'Double Room',
             number_of_nights: 1
         )
         room_type_price_repository = FakeRoomTypePriceRepository.new(
-            {hotel_room_stay.room_type => price_of_one_night_in_double_room_at_palace_hotel})
+            {hotel_room_stay.room_type => PRICE_OF_ONE_NIGHT_IN_DOUBLE_ROOM_AT_PALACE_HOTEL})
         Booking.new(self, room_type_price_repository)
             .add(hotel_room_stay)
             .total
-        assert_equal(price_of_one_night_in_double_room_at_palace_hotel, @displayed_total)
+        assert_equal(PRICE_OF_ONE_NIGHT_IN_DOUBLE_ROOM_AT_PALACE_HOTEL, @displayed_total)
     end
 
-    def test_When_booking_one_night_in_single_room_at_palace_hotel_Then_displayed_total_is_63_pounds
-        price_of_one_night_in_single_room_at_palace_hotel = Money.new(amount: 63)
+    def test_When_booking_one_night_in_single_room_at_palace_hotel_Then_displayed_total_matches_room_price
         hotel_room_stay = HotelRoomStay.new(
             hotel: 'Palace Hotel',
             room_type: 'Single Room',
             number_of_nights: 1
         )
         room_type_price_repository = FakeRoomTypePriceRepository.new(
-            {hotel_room_stay.room_type => price_of_one_night_in_single_room_at_palace_hotel})
+            {hotel_room_stay.room_type => PRICE_OF_ONE_NIGHT_IN_SINGLE_ROOM_AT_PALACE_HOTEL})
         Booking.new(self, room_type_price_repository)
             .add(hotel_room_stay)
             .total
-        assert_equal(price_of_one_night_in_single_room_at_palace_hotel, @displayed_total)
+        assert_equal(PRICE_OF_ONE_NIGHT_IN_SINGLE_ROOM_AT_PALACE_HOTEL, @displayed_total)
     end
 
-    def test_When_booking_two_nights_in_single_room_at_palace_hotel_Then_displayed_total_is_126
-        price_of_one_night_in_single_room_at_palace_hotel = Money.new(amount: 63)
+    def test_When_booking_two_nights_in_single_room_at_palace_hotel_Then_displayed_total_is_double_room_price
         hotel_room_stay = HotelRoomStay.new(
             hotel: 'Palace Hotel',
             room_type: 'Single Room',
             number_of_nights: 2
         )
+        expected_total_amount = PRICE_OF_ONE_NIGHT_IN_SINGLE_ROOM_AT_PALACE_HOTEL.amount * hotel_room_stay.number_of_nights
         room_type_price_repository = FakeRoomTypePriceRepository.new(
-            {hotel_room_stay.room_type => price_of_one_night_in_single_room_at_palace_hotel})
+            {hotel_room_stay.room_type => PRICE_OF_ONE_NIGHT_IN_SINGLE_ROOM_AT_PALACE_HOTEL})
         Booking.new(self, room_type_price_repository)
             .add(hotel_room_stay)
             .total
-        assert_equal(Money.new(amount: 126), @displayed_total)
+        assert_equal(Money.new(amount: expected_total_amount), @displayed_total)
     end
+
+    # def test_
+    #     assert_equal(Money.new(amount: single_room_stay))
+    # end
     
     def show_total(total)
         @displayed_total = total
@@ -119,17 +127,7 @@ class BookingTotal
     end
 end
 
-class Money
-    attr_reader :amount
 
-    def initialize(values)
-        @amount = values[:amount]
-    end
-
-    def ==(money)
-        @amount == money.amount
-    end
-end
 
 class HotelRoomStay
     attr_reader :hotel, :room_type, :number_of_nights
