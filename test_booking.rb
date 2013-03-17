@@ -34,17 +34,38 @@ end
 
 class Booking
     def initialize(booking_display, room_prices)
-        @room_prices = room_prices
         @booking_total = BookingTotal.new(booking_display)
+        @hotel = Hotel.new(room_prices, @booking_total)
     end
     
     def add(hotel_room_stay)
-        room_price = @room_prices[hotel_room_stay.room_type] 
-        @booking_total.increment_by(room_price)
+        hotel_booking = HotelBooking.new(room_type: hotel_room_stay.room_type)
+        @hotel.book_room(hotel_booking)
         self
     end
+
     def total
         @booking_total.show
+    end
+end
+
+class HotelBooking
+    attr_reader :room_type
+
+    def initialize(values)
+        @room_type = values[:room_type]
+    end
+end
+
+class Hotel
+    def initialize(room_prices, booking_total)
+        @room_prices = room_prices
+        @booking_total = booking_total
+    end
+
+    def book_room(hotel_booking)
+        room_price = @room_prices[hotel_booking.room_type] 
+        @booking_total.increment_by(room_price)
     end
 end
 
