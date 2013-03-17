@@ -34,16 +34,31 @@ end
 
 class Booking
     def initialize(booking_display, room_prices)
-        @booking_display = booking_display
         @room_prices = room_prices
+        @booking_total = BookingTotal.new(booking_display)
     end
     
     def add(hotel_room_stay)
-        @total = @room_prices[hotel_room_stay.room_type] 
+        room_price = @room_prices[hotel_room_stay.room_type] 
+        @booking_total.increment_by(room_price)
         self
     end
     def total
-        @booking_display.show_total(@total)
+        @booking_total.show
+    end
+end
+
+class BookingTotal
+    def initialize(booking_display)
+        @booking_display = booking_display
+    end
+
+    def increment_by(amount)
+        @total_amount = amount
+    end
+
+    def show
+        @booking_display.show_total(@total_amount)
     end
 end
 
